@@ -31,7 +31,7 @@ namespace CameraRecorder
         {
             var capture = new Capture();
 
-            capture.Initialize();
+            //capture.Initialize();
 
             //capture.CaptureDevices();
 

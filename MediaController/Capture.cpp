@@ -227,11 +227,13 @@ namespace MediaController
         {
             goto Exit;
         }
+
         hr = MFCreateAttributes(&pAttributes, 1);
         if (FAILED(hr))
         {
             goto Exit;
         }
+
         hr = pAttributes->SetUnknown(MF_CAPTURE_ENGINE_D3D_MANAGER, g_pDXGIMan);
         if (FAILED(hr))
         {
@@ -268,6 +270,7 @@ namespace MediaController
         //}
 
     Exit:
+
         if (NULL != pAttributes)
         {
             pAttributes->Release();
