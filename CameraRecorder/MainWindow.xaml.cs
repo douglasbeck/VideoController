@@ -25,22 +25,31 @@ namespace CameraRecorder
         public MainWindow()
         {
             InitializeComponent();
+
+            captureEngine = new Capture();
+
+            captureEngine.CaptureDevices();
+
+            foreach (var videoDevice in captureEngine.GetDevices())
+            {
+                this.deviceList.Items.Add(videoDevice);
+            }
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            var capture = new Capture();
+            if (this.deviceList.SelectedItem == null)
+            {
+                return;
+            }
 
-            //capture.Initialize();
+            var videoDevice = (VideoDevice)this.deviceList.SelectedItem;
 
-            //capture.CaptureDevices();
+            captureEngine.Initialize(videoDevice);
 
-            //foreach(var videoDevice in capture.GetDevices())
-            //{
-            //    Debug.Print(videoDevice.GetName());
-            //    this.deviceList.Items.Add(videoDevice.GetName());
-            //}
-
+            Debug.Print(videoDevice.GetName());
         }
+
+        Capture captureEngine;
     }
 }

@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Camera Controller" Height="350" Width="525">
     <Grid>
-        <Button Content="Start" HorizontalAlignment="Left" Margin="206,31,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1.067,0.5" Click="Start_Click"/>
-        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="162" Margin="136,109,0,0" VerticalAlignment="Top" Width="237" />
+        <Button Content="Go" HorizontalAlignment="Left" Margin="193,224,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1.067,0.5" Click="Start_Click"/>
+        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="162" Margin="129,28,0,0" VerticalAlignment="Top" Width="237" />
 
     </Grid>
 </Window>
