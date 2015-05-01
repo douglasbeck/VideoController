@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClInclude Include="Capture.h" />
     <ClInclude Include="FileManager.h" />
+    <ClInclude Include="ICaptureEventSink.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Stdafx.h" />
     <ClInclude Include="VideoDevice.h" />

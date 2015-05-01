@@ -26,30 +26,18 @@ namespace CameraRecorder
         {
             InitializeComponent();
 
-            captureEngine = new Capture();
+            captureEngine = new Capture(cameraControlEvents);
 
             captureEngine.CaptureDevices();
-
-            foreach (var videoDevice in captureEngine.GetDevices())
-            {
-                this.deviceList.Items.Add(videoDevice);
-            }
         }
 
-        private void Start_Click(object sender, RoutedEventArgs e)
+        private void DevicesMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (this.deviceList.SelectedItem == null)
-            {
-                return;
-            }
-
-            var videoDevice = (VideoDevice)this.deviceList.SelectedItem;
-
-            captureEngine.Initialize(videoDevice);
-
-            Debug.Print(videoDevice.GetName());
+            var devicesWindows = new Cameras(captureEngine);
+            devicesWindows.ShowDialog();
         }
 
+        CameraControlEvents cameraControlEvents = new CameraControlEvents();
         Capture captureEngine;
     }
 }
