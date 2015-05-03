@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -22,11 +23,28 @@ namespace CameraRecorder
     /// </summary>
     public partial class MainWindow : Window
     {
+        const int MF_VERSION = 0x0002 << 16 | 0x0070;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            captureEngine = new Capture(cameraControlEvents);
+            int hr = MediaFoundation.MFStartup(MF_VERSION);
+
+            if (hr < 0)
+            {
+                return;
+            }
+
+
+            viewer.ShowActivated = false;
+            viewer.Show();
+            viewer.Hide();
+
+            var wih = new WindowInteropHelper(viewer);
+            var viewerHandle = wih.Handle;
+
+            captureEngine = new Capture(cameraControlEvents, viewerHandle);
 
             captureEngine.CaptureDevices();
         }
@@ -39,5 +57,12 @@ namespace CameraRecorder
 
         CameraControlEvents cameraControlEvents = new CameraControlEvents();
         Capture captureEngine;
+        Viewer viewer = new Viewer();
+
+        private void Preview_Click(object sender, RoutedEventArgs e)
+        {
+            viewer.Show();
+            captureEngine.StartPreview();
+        }
     }
 }

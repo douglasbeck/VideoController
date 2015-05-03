@@ -50,5 +50,21 @@ namespace CameraRecorder
 
             Debug.Print(videoDevice.GetName());
         }
+
+        private void deviceList_MouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+            if (this.deviceList.SelectedItem == null)
+            {
+                return;
+            }
+
+            var videoDevice = (VideoDevice)this.deviceList.SelectedItem;
+
+            captureEngine.Initialize(videoDevice);
+
+            this.Close();
+
+            Debug.Print(videoDevice.GetName());
+        }
     }
 }
