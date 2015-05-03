@@ -21,9 +21,10 @@ namespace CameraRecorder
     /// </summary>
     public partial class Cameras : Window
     {
-        public Cameras(Capture captureEngine)
+        public Cameras(MainWindow mainWindow, Capture captureEngine)
         {
             this.captureEngine = captureEngine;
+            this.mainWindow = mainWindow;
 
             InitializeComponent();
 
@@ -31,24 +32,6 @@ namespace CameraRecorder
             {
                 this.deviceList.Items.Add(videoDevice);
             }
-        }
-
-        private Capture captureEngine;
-
-        private void Ok_Click(object sender, RoutedEventArgs e)
-        {
-            if (this.deviceList.SelectedItem == null)
-            {
-                return;
-            }
-
-            var videoDevice = (VideoDevice)this.deviceList.SelectedItem;
-
-            captureEngine.Initialize(videoDevice);
-
-            this.Close();
-
-            Debug.Print(videoDevice.GetName());
         }
 
         private void deviceList_MouseDoubleClick(object sender, RoutedEventArgs e)
@@ -60,11 +43,19 @@ namespace CameraRecorder
 
             var videoDevice = (VideoDevice)this.deviceList.SelectedItem;
 
-            captureEngine.Initialize(videoDevice);
+            int hResult = captureEngine.Initialize(videoDevice);
+
+            if(hResult >= 0)
+            {
+                mainWindow.control.IsEnabled = true;
+            }
 
             this.Close();
 
             Debug.Print(videoDevice.GetName());
         }
+
+        private Capture     captureEngine;
+        private MainWindow  mainWindow;
     }
 }

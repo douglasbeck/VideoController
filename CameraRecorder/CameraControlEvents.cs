@@ -10,9 +10,19 @@ namespace CameraRecorder
 {
     public class CameraControlEvents : ICaptureEventSink
     {
-        public void OnPreviewCompleted()
+        public CameraControlEvents(MainWindow mainWindow)
         {
-            Debug.Print("OnPreviewCompleted");
+            this.mainWindow = mainWindow;
         }
+        public void OnPreviewStarted()
+        {
+            Debug.Print("OnPreviewStarted");
+        }
+        public void OnPreviewStopped()
+        {
+            Debug.Print("OnPreviewStopped");
+        }
+
+        private MainWindow mainWindow;
     }
 }

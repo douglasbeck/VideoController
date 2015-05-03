@@ -10,9 +10,11 @@
             </LinearGradientBrush>
         </Grid.Background>
         <Menu HorizontalAlignment="Left" Height="23" VerticalAlignment="Top" Width="476">
-            <MenuItem Header="Devices" Click="DevicesMenuItem_Click"/>
+            <MenuItem Name ="devices" Header="Devices" Click="DevicesMenuItem_Click"/>
+            <MenuItem Name ="control" Header="Control" IsEnabled="False">
+                <MenuItem Header="Preview" Click="PreviewMenuItem_Click"/>
+            </MenuItem>
         </Menu>
-        <Button Content="Preview" HorizontalAlignment="Left" Margin="27,54,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.013,0.8" Click="Preview_Click"/>
 
     </Grid>
 </Window>

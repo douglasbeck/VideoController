@@ -36,6 +36,7 @@ namespace CameraRecorder
                 return;
             }
 
+            cameraControlEvents = new CameraControlEvents(this);
 
             viewer.ShowActivated = false;
             viewer.Show();
@@ -51,18 +52,19 @@ namespace CameraRecorder
 
         private void DevicesMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var devicesWindows = new Cameras(captureEngine);
+            var devicesWindows = new Cameras(this, captureEngine);
             devicesWindows.ShowDialog();
         }
 
-        CameraControlEvents cameraControlEvents = new CameraControlEvents();
-        Capture captureEngine;
-        Viewer viewer = new Viewer();
-
-        private void Preview_Click(object sender, RoutedEventArgs e)
+        private void PreviewMenuItem_Click(object sender, RoutedEventArgs e)
         {
             viewer.Show();
             captureEngine.StartPreview();
         }
+
+        CameraControlEvents cameraControlEvents;
+        Capture captureEngine;
+        Viewer viewer = new Viewer();
+
     }
 }
