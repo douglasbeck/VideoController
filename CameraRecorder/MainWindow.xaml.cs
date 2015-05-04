@@ -53,8 +53,11 @@ namespace CameraRecorder
 
         private void PreviewMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            viewer = new Viewer();
             viewer.ShowActivated = false;
             viewer.Show();
+
+            viewer.Closing += ViewerClosedEvent;
 
             var wih = new WindowInteropHelper(viewer);
             var viewerHandle = wih.Handle;
@@ -64,13 +67,25 @@ namespace CameraRecorder
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            this.viewer.Close();
+            if(viewer == null)
+            {
+                viewer.Close();
+            }
+
             base.OnClosing(e);
+        }
+
+        void ViewerClosedEvent(Object sender, EventArgs eventArgs)
+        {
+            Debug.Print("MainWindow.ViewerClosedEvent");
+
+            control.IsEnabled = false;
+            captureEngine.UnInitialize();
         }
 
         CameraControlEvents cameraControlEvents;
         Capture captureEngine;
-        Viewer viewer = new Viewer();
+        Viewer viewer;
 
     }
 }
