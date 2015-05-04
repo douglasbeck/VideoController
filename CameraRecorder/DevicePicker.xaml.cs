@@ -17,7 +17,7 @@ using MediaController;
 namespace CameraRecorder
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for Cameras.xaml
     /// </summary>
     public partial class Cameras : Window
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,23 +30,17 @@ namespace CameraRecorder
         {
             InitializeComponent();
 
-            int hr = MediaFoundation.MFStartup(MF_VERSION);
+            int hResult = MediaFoundation.MFStartup(MF_VERSION);
 
-            if (hr < 0)
+            if (hResult < 0)
             {
-                return;
+                MessageBox.Show(String.Format("MediaFound startup failure: {0}", hResult));
+                Application.Current.Shutdown();
             }
 
             cameraControlEvents = new CameraControlEvents(this);
 
-            viewer.ShowActivated = false;
-            viewer.Show();
-            viewer.Hide();
-
-            var wih = new WindowInteropHelper(viewer);
-            var viewerHandle = wih.Handle;
-
-            captureEngine = new Capture(cameraControlEvents, viewerHandle);
+            captureEngine = new Capture(cameraControlEvents);
 
             captureEngine.CaptureDevices();
         }
@@ -58,8 +53,19 @@ namespace CameraRecorder
 
         private void PreviewMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            viewer.ShowActivated = false;
             viewer.Show();
-            captureEngine.StartPreview();
+
+            var wih = new WindowInteropHelper(viewer);
+            var viewerHandle = wih.Handle;
+
+            captureEngine.StartPreview(viewerHandle);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            this.viewer.Close();
+            base.OnClosing(e);
         }
 
         CameraControlEvents cameraControlEvents;
