@@ -39,53 +39,112 @@ namespace CameraRecorder
             }
 
             cameraControlEvents = new CameraControlEvents(this);
-
             captureEngine = new Capture(cameraControlEvents);
-
             captureEngine.CaptureDevices();
+
+            devices.SubmenuOpened += devices_SubmenuOpened;
+        }
+
+        void devices_SubmenuOpened(object sender, RoutedEventArgs e)
+        {
+            devices.Items.Clear();
+
+            foreach(var device in captureEngine.GetDevices())
+            {
+                MenuItem item = new MenuItem();
+                item.Header = device.GetName();
+                item.Click += DevicesMenuItem_Click;
+                item.Tag = device;
+                devices.Items.Add(item);
+            }
         }
 
         private void DevicesMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var devicesWindows = new Cameras(this, captureEngine);
-            devicesWindows.ShowDialog();
+            var videoDevice = (VideoDevice)((MenuItem)sender).Tag;
+
+            int hResult = captureEngine.Initialize(videoDevice);
+
+            if (hResult >= 0)
+            {
+                control.IsEnabled = true;
+                Debug.Print(videoDevice.GetName());
+            }
+            else
+            {
+                MessageBox.Show(String.Format("Device initialization failed: {0}", hResult));
+            }
         }
 
-        private void PreviewMenuItem_Click(object sender, RoutedEventArgs e)
+        private void StartPreviewMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            viewer = new Viewer();
-            viewer.ShowActivated = false;
-            viewer.Show();
+            captureEngine.StartPreview(panel.Handle);
+        }
 
-            viewer.Closing += ViewerClosedEvent;
-
-            var wih = new WindowInteropHelper(viewer);
-            var viewerHandle = wih.Handle;
-
-            captureEngine.StartPreview(viewerHandle);
+        private void StopPreviewMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureEngine.StopPreview();
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            if(viewer == null)
-            {
-                viewer.Close();
-            }
-
             base.OnClosing(e);
         }
 
-        void ViewerClosedEvent(Object sender, EventArgs eventArgs)
+        public void OnPreviewStarted(int hResult)
         {
-            Debug.Print("MainWindow.ViewerClosedEvent");
+            Debug.Print("MainWindow.OnPreviewStarted hResult = {0}");
 
-            control.IsEnabled = false;
-            captureEngine.UnInitialize();
+            if(hResult < 0)
+            {
+                MessageBox.Show(string.Format("Start Preview Failed: {0}", hResult), "Start Preview Error");
+                return;
+            }
+
+            var startPreviewMenuItem = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem = control.Items[1] as MenuItem;
+
+            if(startPreviewMenuItem != null)
+            {
+                startPreviewMenuItem.IsEnabled = false;
+            }
+
+            if (stopPreviewMenuItem != null)
+            {
+                stopPreviewMenuItem.IsEnabled = true;
+            }
+        }
+
+        public void OnPreviewStopped(int hResult)
+        {
+            Debug.Print("MainWindow.OnPreviewStopped hResult = {0}");
+
+            if (hResult < 0)
+            {
+                MessageBox.Show(string.Format("Stop Preview Failed: {0}", hResult), "Stop Preview Error");
+            }
+
+            var startPreviewMenuItem = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem = control.Items[1] as MenuItem;
+
+            if (startPreviewMenuItem != null)
+            {
+                startPreviewMenuItem.IsEnabled = true;
+            }
+
+            if (stopPreviewMenuItem != null)
+            {
+                stopPreviewMenuItem.IsEnabled = false;
+            }
         }
 
         CameraControlEvents cameraControlEvents;
         Capture captureEngine;
-        Viewer viewer;
+
+        private void control_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
 
     }
 }

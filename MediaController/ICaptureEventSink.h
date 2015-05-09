@@ -4,7 +4,7 @@ namespace MediaController
 { 
     public interface class ICaptureEventSink
     {
-        virtual void OnPreviewStarted();
-        virtual void OnPreviewStopped();
+        virtual void OnPreviewStarted(int hResult);
+        virtual void OnPreviewStopped(int hResult);
     };
 }

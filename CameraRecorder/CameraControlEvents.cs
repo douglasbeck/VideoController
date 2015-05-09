@@ -14,13 +14,16 @@ namespace CameraRecorder
         {
             this.mainWindow = mainWindow;
         }
-        public void OnPreviewStarted()
+        public void OnPreviewStarted(int hResult)
         {
             Debug.Print("OnPreviewStarted");
+
+            mainWindow.Dispatcher.Invoke(new Action<int>(mainWindow.OnPreviewStarted), hResult);
         }
-        public void OnPreviewStopped()
+        public void OnPreviewStopped(int hResult)
         {
             Debug.Print("OnPreviewStopped");
+            mainWindow.Dispatcher.Invoke(new Action<int>(mainWindow.OnPreviewStopped), hResult);
         }
 
         private MainWindow mainWindow;
