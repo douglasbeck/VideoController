@@ -88,12 +88,14 @@ namespace CameraRecorder
 
         private void StartContinuousRecordMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            captureEngine.StartRecord();
+            captureEngine.StartContinuousRecord();
+            continuouslyRecording = true;
         }
 
         private void StopContinuousRecordMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            captureEngine.StopRecord();
+            continuouslyRecording = false;
+            captureEngine.StopContinuousRecord();
         }
 
         private void StartRecordMenuItem_Click(object sender, RoutedEventArgs e)
@@ -121,9 +123,10 @@ namespace CameraRecorder
                 return;
             }
 
-            var startPreviewMenuItem    = control.Items[0] as MenuItem;
-            var stopPreviewMenuItem     = control.Items[1] as MenuItem;
-            var startRecordMenuItem     = control.Items[2] as MenuItem;
+            var startPreviewMenuItem            = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem             = control.Items[1] as MenuItem;
+            var startRecordMenuItem             = control.Items[2] as MenuItem;
+            var startContinuousRecordMenuItem   = control.Items[4] as MenuItem;
 
             if(startPreviewMenuItem != null)
             {
@@ -139,6 +142,11 @@ namespace CameraRecorder
             {
                 startRecordMenuItem.IsEnabled = true;
             }
+
+            if (startContinuousRecordMenuItem != null)
+            {
+                startContinuousRecordMenuItem.IsEnabled = true;
+            }
         }
 
         public void OnPreviewStopped(int hResult)
@@ -153,6 +161,8 @@ namespace CameraRecorder
             var startPreviewMenuItem = control.Items[0] as MenuItem;
             var stopPreviewMenuItem = control.Items[1] as MenuItem;
             var startRecordMenuItem = control.Items[2] as MenuItem;
+            var startContinuousRecordMenuItem = control.Items[4] as MenuItem;
+            var stopContinuousRecordMenuItem = control.Items[5] as MenuItem;
 
             if (startPreviewMenuItem != null)
             {
@@ -168,6 +178,16 @@ namespace CameraRecorder
             {
                 startRecordMenuItem.IsEnabled = false;
             }
+
+            if (startContinuousRecordMenuItem != null)
+            {
+                startContinuousRecordMenuItem.IsEnabled = false;
+            }
+
+            if (stopContinuousRecordMenuItem != null)
+            {
+                stopContinuousRecordMenuItem.IsEnabled = false;
+            }
         }
 
         public void OnRecordStarted(int hResult)
@@ -181,10 +201,12 @@ namespace CameraRecorder
                 return;
             }
 
-            var startPreviewMenuItem = control.Items[0] as MenuItem;
-            var stopPreviewMenuItem = control.Items[1] as MenuItem;
-            var startRecordMenuItem = control.Items[2] as MenuItem;
-            var stopRecordMenuItem = control.Items[3] as MenuItem;
+            var startPreviewMenuItem            = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem             = control.Items[1] as MenuItem;
+            var startRecordMenuItem             = control.Items[2] as MenuItem;
+            var stopRecordMenuItem              = control.Items[3] as MenuItem;
+            var startContinuousRecordMenuItem   = control.Items[4] as MenuItem;
+            var stopContinuousRecordMenuItem    = control.Items[5] as MenuItem;
 
             if (startPreviewMenuItem != null)
             {
@@ -201,9 +223,19 @@ namespace CameraRecorder
                 startRecordMenuItem.IsEnabled = false;
             }
 
-            if (stopRecordMenuItem != null)
+            if (stopRecordMenuItem != null && continuouslyRecording == false)
             {
                 stopRecordMenuItem.IsEnabled = true;
+            }
+
+            if (startContinuousRecordMenuItem != null)
+            {
+                startContinuousRecordMenuItem.IsEnabled = false;
+            }
+
+            if (stopContinuousRecordMenuItem != null && continuouslyRecording == true)
+            {
+                stopContinuousRecordMenuItem.IsEnabled = true;
             }
         }
 
@@ -217,10 +249,17 @@ namespace CameraRecorder
                 return;
             }
 
-            var startPreviewMenuItem = control.Items[0] as MenuItem;
-            var stopPreviewMenuItem = control.Items[1] as MenuItem;
-            var startRecordMenuItem = control.Items[2] as MenuItem;
-            var stopRecordMenuItem = control.Items[3] as MenuItem;
+            if (continuouslyRecording == true)
+            {
+                return;
+            }
+
+            var startPreviewMenuItem            = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem             = control.Items[1] as MenuItem;
+            var startRecordMenuItem             = control.Items[2] as MenuItem;
+            var stopRecordMenuItem              = control.Items[3] as MenuItem;
+            var startContinuousRecordMenuItem   = control.Items[4] as MenuItem;
+            var stopContinuousRecordMenuItem    = control.Items[5] as MenuItem;
 
             if (stopPreviewMenuItem != null)
             {
@@ -231,10 +270,21 @@ namespace CameraRecorder
             {
                 stopRecordMenuItem.IsEnabled = false;
             }
+
+            if (startContinuousRecordMenuItem != null)
+            {
+                startContinuousRecordMenuItem.IsEnabled = true;
+            }
+
+            if (stopContinuousRecordMenuItem != null)
+            {
+                stopContinuousRecordMenuItem.IsEnabled = false;
+            }
         }
 
         CameraControlEvents cameraControlEvents;
         Capture captureEngine;
+        bool continuouslyRecording = false;
 
         private void control_Click(object sender, RoutedEventArgs e)
         {
