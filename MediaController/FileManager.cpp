@@ -6,9 +6,8 @@
 
 //VOID DbgPrint(PCTSTR format, ...);
 
-FileManager::FileManager(PCWSTR baseName, HWND mainWindow)
+FileManager::FileManager(PCWSTR baseName)
 {
-	hwndMainWindow = mainWindow;
 	baseFileName.append(baseName);
 }
 
@@ -40,51 +39,6 @@ wstring FileManager::GetNextFile()
 	fileName.append(L".mp4");
 
 	return fileName;
-}
-
-void FileManager::StopCycleTimer()
-{
-	//DbgPrint(L"FileManager::StopCycleTimer");
-
-	DeleteTimerQueueTimer( NULL, timerHandle, NULL);
-}
-
-void FileManager::StartCycleTimer()
-{
-	//DbgPrint(L"FileManager::StartCycleTimer");
-
-	BOOL timerCreated = ::CreateTimerQueueTimer(
-		&timerHandle,
-		NULL,
-		CycleTimerCallback,
-		(PVOID)(hwndMainWindow),
-		900000,
-		900000,
-		WT_EXECUTEDEFAULT);
-}
-
-void FileManager::OnRecordingStopped()
-{
-	//DbgPrint(L"FileManager::OnRecordingStopped");
-
-	//BOOL bReturn = PostMessage(hwndMainWindow, WM_COMMAND, ID_AUTO_CAPTURE_START, 0);
-
-	//if (!bReturn)
-	//{
-	//	cout << "Fail";
-	//}
-}
-
-void CALLBACK FileManager::CycleTimerCallback(PVOID windowHandle, BOOLEAN timerOrWaitFired)
-{
-	//DbgPrint(L"FileManager::CycleTimerCallback");
-
-	//BOOL bReturn = PostMessage((HWND)windowHandle, WM_COMMAND, ID_AUTO_CAPTURE_STOP, 0);
-
-	//if (!bReturn)
-	//{
-	//	cout << "Fail";
-	//}
 }
 
 FileManager::~FileManager()

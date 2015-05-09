@@ -86,6 +86,26 @@ namespace CameraRecorder
             captureEngine.StopPreview();
         }
 
+        private void StartContinuousRecordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureEngine.StartRecord();
+        }
+
+        private void StopContinuousRecordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureEngine.StopRecord();
+        }
+
+        private void StartRecordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureEngine.StartRecord();
+        }
+
+        private void StopRecordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            captureEngine.StopRecord();
+        }
+
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
@@ -93,7 +113,7 @@ namespace CameraRecorder
 
         public void OnPreviewStarted(int hResult)
         {
-            Debug.Print("MainWindow.OnPreviewStarted hResult = {0}");
+            Debug.Print("MainWindow.OnPreviewStarted hResult = {0}", hResult);
 
             if(hResult < 0)
             {
@@ -101,8 +121,9 @@ namespace CameraRecorder
                 return;
             }
 
-            var startPreviewMenuItem = control.Items[0] as MenuItem;
-            var stopPreviewMenuItem = control.Items[1] as MenuItem;
+            var startPreviewMenuItem    = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem     = control.Items[1] as MenuItem;
+            var startRecordMenuItem     = control.Items[2] as MenuItem;
 
             if(startPreviewMenuItem != null)
             {
@@ -113,11 +134,16 @@ namespace CameraRecorder
             {
                 stopPreviewMenuItem.IsEnabled = true;
             }
+
+            if (startRecordMenuItem != null)
+            {
+                startRecordMenuItem.IsEnabled = true;
+            }
         }
 
         public void OnPreviewStopped(int hResult)
         {
-            Debug.Print("MainWindow.OnPreviewStopped hResult = {0}");
+            Debug.Print("MainWindow.OnPreviewStopped hResult = {0}, hResult");
 
             if (hResult < 0)
             {
@@ -126,6 +152,7 @@ namespace CameraRecorder
 
             var startPreviewMenuItem = control.Items[0] as MenuItem;
             var stopPreviewMenuItem = control.Items[1] as MenuItem;
+            var startRecordMenuItem = control.Items[2] as MenuItem;
 
             if (startPreviewMenuItem != null)
             {
@@ -135,6 +162,74 @@ namespace CameraRecorder
             if (stopPreviewMenuItem != null)
             {
                 stopPreviewMenuItem.IsEnabled = false;
+            }
+
+            if (startRecordMenuItem != null)
+            {
+                startRecordMenuItem.IsEnabled = false;
+            }
+        }
+
+        public void OnRecordStarted(int hResult)
+        {
+            Debug.Print("MainWindow.OnRecordStarted hResult = {0}", hResult);
+
+
+            if (hResult < 0)
+            {
+                MessageBox.Show(string.Format("Start Record Failed: {0}", hResult), "Start Record Error");
+                return;
+            }
+
+            var startPreviewMenuItem = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem = control.Items[1] as MenuItem;
+            var startRecordMenuItem = control.Items[2] as MenuItem;
+            var stopRecordMenuItem = control.Items[3] as MenuItem;
+
+            if (startPreviewMenuItem != null)
+            {
+                startPreviewMenuItem.IsEnabled = false;
+            }
+
+            if (stopPreviewMenuItem != null)
+            {
+                stopPreviewMenuItem.IsEnabled = false;
+            }
+
+            if (startRecordMenuItem != null)
+            {
+                startRecordMenuItem.IsEnabled = false;
+            }
+
+            if (stopRecordMenuItem != null)
+            {
+                stopRecordMenuItem.IsEnabled = true;
+            }
+        }
+
+        public void OnRecordStopped(int hResult)
+        {
+            Debug.Print("MainWindow.OnRecordStopped hResult = {0}", hResult);
+
+            if (hResult < 0)
+            {
+                MessageBox.Show(string.Format("Stop Record Failed: {0}", hResult), "Stop Record Error");
+                return;
+            }
+
+            var startPreviewMenuItem = control.Items[0] as MenuItem;
+            var stopPreviewMenuItem = control.Items[1] as MenuItem;
+            var startRecordMenuItem = control.Items[2] as MenuItem;
+            var stopRecordMenuItem = control.Items[3] as MenuItem;
+
+            if (stopPreviewMenuItem != null)
+            {
+                stopPreviewMenuItem.IsEnabled = true;
+            }
+
+            if (stopRecordMenuItem != null)
+            {
+                stopRecordMenuItem.IsEnabled = false;
             }
         }
 

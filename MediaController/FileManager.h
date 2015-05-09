@@ -9,22 +9,15 @@ class FileManager
 {
 public:
 
-	FileManager(PCWSTR baseName, HWND mainWindow);
+	FileManager(PCWSTR baseName);
 
 	wstring GetNextFile();
-
-	void StartCycleTimer();
-	void StopCycleTimer();
-	void OnRecordingStopped();
-
 	~FileManager();
 
 
 private:
 
-	HWND	hwndMainWindow;
 	wstring baseFileName;
-	HANDLE  timerHandle;
 
 	static void CALLBACK CycleTimerCallback(PVOID windowHandle, BOOLEAN timerOrWaitFired);
 };
