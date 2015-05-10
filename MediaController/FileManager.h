@@ -1,24 +1,19 @@
 #pragma once
 
-#include <windows.h>
-#include <string>
+using namespace System;
 
-using namespace std;
-
-class FileManager
+ref class FileManager
 {
 public:
 
-	FileManager(PCWSTR baseName);
+	FileManager(String^ baseName);
 
-	wstring GetNextFile();
+	String^ GetNextFile();
 	~FileManager();
 
 
 private:
 
-	wstring baseFileName;
-
-	static void CALLBACK CycleTimerCallback(PVOID windowHandle, BOOLEAN timerOrWaitFired);
+	String^ baseFileName;
 };
 

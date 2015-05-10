@@ -1,44 +1,34 @@
 #include "stdafx.h"
 #include "FileManager.h"
-#include "resource.h"
-#include <ctime>
-#include <iostream>
 
-//VOID DbgPrint(PCTSTR format, ...);
+using namespace System::Text;
 
-FileManager::FileManager(PCWSTR baseName)
+FileManager::FileManager(String^ baseName)
 {
-	baseFileName.append(baseName);
+    baseFileName = gcnew String(baseName);
 }
 
-wstring FileManager::GetNextFile()
+String^ FileManager::GetNextFile()
 {
-	time_t t = time(0);   // get time now
-	struct tm* now = localtime(&t);
+    DateTime dateTime = DateTime::Now;
 
-	cout << (now->tm_year + 1900) << '-'
-		<< (now->tm_mon + 1) << '-'
-		<< now->tm_mday
-		<< endl;
+	StringBuilder^ fileName = gcnew StringBuilder(baseFileName);
 
-	wstring fileName = baseFileName;
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Year);
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Month);
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Day);
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Hour);
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Minute);
+    fileName->Append(L"-");
+    fileName->Append(dateTime.Second);
+    fileName->Append(L".mp4");
 
-	fileName.append(L"-");
-
-	fileName.append(to_wstring(now->tm_year+1900));
-	fileName.append(L"-");
-	fileName.append(to_wstring(now->tm_mon+1));
-	fileName.append(L"-");
-	fileName.append(to_wstring(now->tm_mday));
-	fileName.append(L"-");
-	fileName.append(to_wstring(now->tm_hour));
-	fileName.append(L"-");
-	fileName.append(to_wstring(now->tm_min));
-	fileName.append(L"-");
-	fileName.append(to_wstring(now->tm_sec));
-	fileName.append(L".mp4");
-
-	return fileName;
+	return fileName->ToString();
 }
 
 FileManager::~FileManager()
