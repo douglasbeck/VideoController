@@ -41,8 +41,16 @@ namespace CameraRecorder
             cameraControlEvents = new CameraControlEvents(this);
             captureEngine = new Capture(cameraControlEvents);
             captureEngine.CaptureDevices();
-
             devices.SubmenuOpened += devices_SubmenuOpened;
+            this.Closing += OnClosing;
+        }
+
+        public void OnClosing(Object sender, CancelEventArgs e)
+        {
+            if(captureEngine != null)
+            {
+                captureEngine.DestroyCaptureEngine();
+            }
         }
 
         void devices_SubmenuOpened(object sender, RoutedEventArgs e)
@@ -285,11 +293,5 @@ namespace CameraRecorder
         CameraControlEvents cameraControlEvents;
         Capture captureEngine;
         bool continuouslyRecording = false;
-
-        private void control_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
     }
 }
