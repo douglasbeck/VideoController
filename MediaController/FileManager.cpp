@@ -1,16 +1,23 @@
 #include "stdafx.h"
 #include "FileManager.h"
 
-using namespace System::Text;
 
-FileManager::FileManager(String^ baseName)
+using namespace System::IO;
+using namespace System::Text;
+using namespace System::Threading::Tasks;
+
+FileManager::FileManager(String^ baseName, int fileQuota)
 {
     baseFileName = gcnew String(baseName);
+    fileQuota < 4 ? maxFileQuota = 4 : maxFileQuota = fileQuota;
 }
 
 String^ FileManager::GetNextFile()
 {
     DateTime dateTime = DateTime::Now;
+
+    Task pruner(gcnew Action(this, &FileManager::PruneFileList));
+    pruner.Start();
 
 	StringBuilder^ fileName = gcnew StringBuilder(baseFileName);
 
@@ -29,6 +36,22 @@ String^ FileManager::GetNextFile()
     fileName->Append(L".mp4");
 
 	return fileName->ToString();
+}
+
+void FileManager::PruneFileList()
+{
+    String^ path;
+    StringBuilder^ searchPattern = gcnew StringBuilder();
+
+    int pathSepPosition = baseFileName->LastIndexOf("\\");
+
+    path = baseFileName->Substring(0, pathSepPosition + 1);
+    searchPattern->Append(baseFileName->Substring(pathSepPosition + 1));
+    searchPattern->Append("*");
+
+    DirectoryInfo^ dirInfo = gcnew DirectoryInfo(path);
+
+    array<FileInfo^>^ files = dirInfo->GetFiles(searchPattern->ToString());
 }
 
 FileManager::~FileManager()

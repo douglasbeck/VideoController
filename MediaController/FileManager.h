@@ -6,7 +6,7 @@ ref class FileManager
 {
 public:
 
-	FileManager(String^ baseName);
+	FileManager(String^ baseName, int fileQuota);
 
 	String^ GetNextFile();
 	~FileManager();
@@ -14,6 +14,8 @@ public:
 
 private:
 
+    void PruneFileList();
+    int     maxFileQuota;
 	String^ baseFileName;
 };
 
