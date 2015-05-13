@@ -1,6 +1,7 @@
 #pragma once
 
 using namespace System;
+using namespace System::Threading::Tasks;
 
 ref class FileManager
 {
@@ -17,5 +18,6 @@ private:
     void PruneFileList();
     int     maxFileQuota;
 	String^ baseFileName;
+    Task^   filePruner;
 };
 

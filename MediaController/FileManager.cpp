@@ -1,10 +1,33 @@
 #include "stdafx.h"
 #include "FileManager.h"
 
-
+using namespace System::Collections;
 using namespace System::IO;
 using namespace System::Text;
-using namespace System::Threading::Tasks;
+
+ref class FileInfoComparer : IComparer
+{
+public:
+
+    virtual int Compare(Object^ x, Object^ y);
+};
+
+int FileInfoComparer::Compare(Object^ x, Object^ y)
+{
+    FileInfo^ fx = static_cast<FileInfo^>(x);
+    FileInfo^ fy = static_cast<FileInfo^>(y);
+
+    if (fx->CreationTimeUtc < fy->CreationTimeUtc)
+    {
+        return -1;
+    }
+    else if (fx->CreationTimeUtc > fy->CreationTimeUtc)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 FileManager::FileManager(String^ baseName, int fileQuota)
 {
@@ -16,8 +39,8 @@ String^ FileManager::GetNextFile()
 {
     DateTime dateTime = DateTime::Now;
 
-    Task pruner(gcnew Action(this, &FileManager::PruneFileList));
-    pruner.Start();
+    filePruner = gcnew Task(gcnew Action(this, &FileManager::PruneFileList));
+    filePruner->Start();
 
 	StringBuilder^ fileName = gcnew StringBuilder(baseFileName);
 
@@ -52,6 +75,16 @@ void FileManager::PruneFileList()
     DirectoryInfo^ dirInfo = gcnew DirectoryInfo(path);
 
     array<FileInfo^>^ files = dirInfo->GetFiles(searchPattern->ToString());
+
+    if (files->Length > maxFileQuota)
+    {
+        array<FileInfo^>::Sort(files, gcnew FileInfoComparer());
+
+        for (int i = 0; i <= files->Length - maxFileQuota; i++)
+        {
+            files[i]->Delete();
+        }
+    }
 }
 
 FileManager::~FileManager()
