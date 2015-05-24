@@ -3,7 +3,7 @@
 #include <mfidl.h>
 #include "Capture.h"
 
-namespace MediaController
+namespace VideoController
 {
     void Capture::CaptureDevices()
     {

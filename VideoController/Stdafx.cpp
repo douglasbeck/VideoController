@@ -1,5 +1,5 @@
 // stdafx.cpp : source file that includes just the standard includes
-// MediaController.pch will be the pre-compiled header
+// VideoController.pch will be the pre-compiled header
 // stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"

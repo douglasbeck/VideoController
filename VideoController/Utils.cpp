@@ -3,7 +3,7 @@
 #include "Utils.h"
 
 // Creates a compatible video format with a different subtype.
-namespace MediaController
+namespace VideoController
 {
     HRESULT ConfigureAudioEncoding(IMFCaptureSource *pSource, IMFCaptureRecordSink *pRecord, REFGUID guidEncodingType)
     {

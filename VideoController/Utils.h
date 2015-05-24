@@ -8,7 +8,7 @@
 #include <mferror.h>
 #include <mfcaptureengine.h>
 
-namespace MediaController
+namespace VideoController
 {
     HRESULT CloneVideoMediaType(IMFMediaType *pSrcMediaType, REFGUID guidSubType, IMFMediaType **ppNewMediaType);
     HRESULT ConfigureAudioEncoding(IMFCaptureSource *pSource, IMFCaptureRecordSink *pRecord, REFGUID guidEncodingType);

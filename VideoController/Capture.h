@@ -36,7 +36,7 @@ using namespace System::Diagnostics;
 using namespace System::Timers;
 using namespace System::Windows;
 
-namespace MediaController
+namespace VideoController
 {
 
 const UINT WM_APP_CAPTURE_EVENT = WM_APP + 1;

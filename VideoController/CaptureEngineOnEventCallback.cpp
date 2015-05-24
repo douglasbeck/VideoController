@@ -6,7 +6,7 @@
 #include "CaptureEngineOnEventCallback.h"
 #include "Capture.h"
 
-namespace MediaController
+namespace VideoController
 {
     STDMETHODIMP CaptureEngineOnEventCallback::QueryInterface(REFIID riid, void** ppv)
     {

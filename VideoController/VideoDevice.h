@@ -5,7 +5,7 @@
 using namespace System;
 using namespace System::Diagnostics;
 
-namespace MediaController
+namespace VideoController
 {
     public ref class VideoDevice
     {

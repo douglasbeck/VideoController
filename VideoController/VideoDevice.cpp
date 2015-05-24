@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "VideoDevice.h"
 
-namespace MediaController
+namespace VideoController
 {
     VideoDevice::VideoDevice(IMFActivate* pDevice)
     {

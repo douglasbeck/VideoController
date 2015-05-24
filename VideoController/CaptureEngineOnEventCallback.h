@@ -2,7 +2,7 @@
 
 #include <vcclr.h>
 
-namespace MediaController
+namespace VideoController
 {
     ref class Capture;
 

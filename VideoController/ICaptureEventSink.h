@@ -1,6 +1,6 @@
 #pragma once
 
-namespace MediaController
+namespace VideoController
 { 
     public interface class ICaptureEventSink
     {

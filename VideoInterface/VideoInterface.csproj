@@ -138,13 +138,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MediaController\MediaController.vcxproj">
-      <Project>{fb528dd2-fd0d-46e0-b599-bee04bd8f04b}</Project>
-      <Name>MediaController</Name>
-    </ProjectReference>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <ProjectReference Include="..\VideoController\VideoController.vcxproj">
+      <Project>{fb528dd2-fd0d-46e0-b599-bee04bd8f04b}</Project>
+      <Name>VideoController</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
