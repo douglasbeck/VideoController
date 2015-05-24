@@ -1,4 +1,3 @@
-// MediaController.h
 #pragma once
 
 #ifndef UNICODE
@@ -14,6 +13,8 @@
 #endif
 
 #include "videodevice.h"
+#include "ICaptureEventSink.h"
+#include "FileManager.h"
 #include <new>
 #include <windows.h>
 #include <windowsx.h>
@@ -25,251 +26,130 @@
 #include <strsafe.h>
 #include <commctrl.h>
 #include <d3d11.h>
+#include <vcclr.h>
+#include "Utils.h"
+#include "CaptureEngineOnEventCallback.h"
 
 using namespace System;
-using namespace System::Diagnostics;
 using namespace System::Collections::Generic;
+using namespace System::Diagnostics;
+using namespace System::Timers;
+using namespace System::Windows;
 
 namespace MediaController
 {
 
 const UINT WM_APP_CAPTURE_EVENT = WM_APP + 1;
 
-template <class T> void SafeRelease(T **ppT)
-{
-    if (*ppT)
-    {
-        (*ppT)->Release();
-        *ppT = NULL;
-    }
-}
-
-// Gets an interface pointer from a Media Foundation collection.
-template <class IFACE>
-HRESULT GetCollectionObject(IMFCollection *pCollection, DWORD index, IFACE **ppObject)
-{
-    IUnknown *pUnk;
-    HRESULT hr = pCollection->GetElement(index, &pUnk);
-    if (SUCCEEDED(hr))
-    {
-        hr = pUnk->QueryInterface(IID_PPV_ARGS(ppObject));
-        pUnk->Release();
-    }
-    return hr;
-}
-
-// DXGI DevManager support
-extern IMFDXGIDeviceManager* g_pDXGIMan;
-extern ID3D11Device*         g_pDX11Device;
-extern UINT                  g_ResetToken;
-
-struct ChooseDeviceParam
-{
-    ChooseDeviceParam() : ppDevices(NULL), count(0)
-    {
-    }
-
-    ~ChooseDeviceParam()
-    {
-        for (DWORD i = 0; i < count; i++)
-        {
-            SafeRelease(&ppDevices[i]);
-        }
-        CoTaskMemFree(ppDevices);
-    }
-
-    IMFActivate **ppDevices;
-    UINT32      count;
-    UINT32      selection;
-};
-
-// The event callback object.
-//class CaptureEngineCB : public IMFCaptureEngineOnEventCallback
-//{
-//    long m_cRef;
-//    HWND m_hwnd;
-//
-//public:
-//    CaptureEngineCB(HWND hwnd) : m_cRef(1), m_hwnd(hwnd), m_fSleeping(false), m_pManager(NULL) {}
-//
-//    // IUnknown
-//    STDMETHODIMP QueryInterface(REFIID riid, void** ppv);
-//    STDMETHODIMP_(ULONG) AddRef();
-//    STDMETHODIMP_(ULONG) Release();
-//
-//    // IMFCaptureEngineOnEventCallback
-//    STDMETHODIMP OnEvent(_In_ IMFMediaEvent* pEvent);
-//
-//    bool m_fSleeping;
-//    CaptureManager* m_pManager;
-//};
-
 public ref class Capture
 {
-    HWND                    m_hwndEvent;
-    HWND                    m_hwndPreview;
-    //FileManager*			m_pFileManager;
+    bool                            m_bPreviewing;
+    bool                            m_bRecording;
+    bool                            m_bInitialized;
+    bool                            m_bContinouslyRecording;
+    HANDLE                          m_hEvent;
 
-    IMFCaptureEngine        *m_pEngine;
-    IMFCapturePreviewSink   *m_pPreview;
+    FileManager^			        m_FileManager;
+    List<VideoDevice^>^             m_videoDevices;
+    ICaptureEventSink^              m_captureEventSink;
+    IMFCaptureEngine*               m_pEngine;
+    IMFCapturePreviewSink*          m_pPreview;
+    CaptureEngineOnEventCallback*   m_pOnEventCallback;
+    Timer^                          m_ContinuousRecordTimer;
+    const UInt32                    RecordLoopPeriod = 30000;
+    const String^                   m_baseFileName = L"G:\\OfficeVideo";
 
-    //CaptureEngineCB         *m_pCallback;
-
-    bool                    m_bPreviewing;
-    bool                    m_bRecording;
-    bool                    m_bPhotoPending;
-
-    UINT                    m_errorID;
-    HANDLE                  m_hEvent;
-    HANDLE                  m_hpwrRequest;
-    bool                    m_fPowerRequestSet;
-
+    // DXGI DevManager support
+    IMFDXGIDeviceManager*           m_pDXGIMan = NULL;
+    ID3D11Device*                   m_pDX11Device = NULL;
+    UINT                            m_ResetToken = 0;
+    
 public:
 
-    Capture(HWND hwnd) :
-        m_hwndEvent(hwnd), 
-        m_hwndPreview(NULL), 
-        m_pEngine(NULL), 
-        m_pPreview(NULL),
-        //m_pCallback(NULL), 
-        m_bRecording(false), 
-        m_bPreviewing(false), 
-        m_bPhotoPending(false), 
-        m_errorID(0), 
-        m_hEvent(NULL), 
-        m_hpwrRequest(INVALID_HANDLE_VALUE), 
-        m_fPowerRequestSet(false)
+    Capture(ICaptureEventSink^ captureEventSink):
+        m_bInitialized(false),
+        m_bContinouslyRecording(false)
+        {
+
+        Debug::Print(L"Capture::Capture");
+
+        m_FileManager           = gcnew FileManager(const_cast<String^>(m_baseFileName), 4);
+        m_videoDevices          = gcnew List<VideoDevice^>();
+        m_captureEventSink      = captureEventSink;
+        m_pOnEventCallback      = new (std::nothrow) CaptureEngineOnEventCallback(this);
+        m_ContinuousRecordTimer = gcnew Timer(RecordLoopPeriod);
+
+        m_ContinuousRecordTimer->AutoReset = true;
+        m_ContinuousRecordTimer->Elapsed += gcnew ElapsedEventHandler(this, &Capture::OnTimedEvent);
+    }
+
+    void            CaptureDevices();
+    static HRESULT  CreateDX11Device(_Out_ ID3D11Device** ppDevice, _Out_ ID3D11DeviceContext** ppDeviceContext, _Out_ D3D_FEATURE_LEVEL* pFeatureLevel);
+    HRESULT         CreateD3DManager();
+    HRESULT         Initialize(VideoDevice^ videoDevice);
+    virtual void    OnPreviewStarted(HRESULT hResult);
+    virtual void    OnPreviewStopped(HRESULT hResult);
+    void            OnRecordStarted(HRESULT hResult);
+    void            OnRecordStopped(HRESULT hResult);
+    HRESULT         StartPreview(IntPtr^ viewerWindow);
+    HRESULT         StopPreview();
+    void            StartContinuousRecord();
+    void            StopContinuousRecord();
+    HRESULT         StartRecord();
+    HRESULT         StopRecord();
+    void            UnInitialize();
+
+    void OnTimedEvent(Object^ source, ElapsedEventArgs^ e)
     {
-        REASON_CONTEXT  pwrCtxt;
-
-        //m_pFileManager = new FileManager(L"G:\\OfficeVideo", hwnd);
-        pwrCtxt.Version = POWER_REQUEST_CONTEXT_VERSION;
-        pwrCtxt.Flags = POWER_REQUEST_CONTEXT_SIMPLE_STRING;
-        pwrCtxt.Reason.SimpleReasonString = L"CaptureEngine is recording!";
-
-        m_hpwrRequest = PowerCreateRequest(&pwrCtxt);
+        this->StopRecord();
+        this->StartRecord();
     }
 
-    void SetErrorID(HRESULT hr, UINT id)
+    List<VideoDevice^>^ GetDevices()
     {
-        m_errorID = SUCCEEDED(hr) ? 0 : id;
+        return m_videoDevices;
     }
 
-    // Capture Engine Event Handlers
-    //void OnInitialized(HRESULT& hrStatus);
-    //void OnPreviewStarted(HRESULT& hrStatus);
-    //void OnPreviewStopped(HRESULT& hrStatus);
-    //void OnRecordStarted(HRESULT& hrStatus);
-    //void OnRecordStopped(HRESULT& hrStatus);
-    //void WaitForResult()
-    //{
-    //    WaitForSingleObject(m_hEvent, INFINITE);
-    //}
-public:
-    //~Capture()
-    //{
-    //    DestroyCaptureEngine();
-    //}
+    void DestroyCaptureEngine()
+    {
+        if (NULL != m_hEvent)
+        {
+            CloseHandle(m_hEvent);
+            m_hEvent = NULL;
+        }
 
-    //static HRESULT CreateInstance(HWND hwndEvent, CaptureManager **ppEngine)
-    //{
-    //    HRESULT hr = S_OK;
-    //    *ppEngine = NULL;
+        IpSafeRelease(m_pPreview);
+        IpSafeRelease(m_pEngine);
+        IpSafeRelease(m_pOnEventCallback);
 
-    //    CaptureManager *pEngine = new (std::nothrow) CaptureManager(hwndEvent);
-    //    if (pEngine == NULL)
-    //    {
-    //        hr = E_OUTOFMEMORY;
-    //        goto Exit;
-    //    }
-    //    *ppEngine = pEngine;
-    //    pEngine = NULL;
+        if (m_pDXGIMan)
+        {
+            m_pDXGIMan->ResetDevice(m_pDX11Device, m_ResetToken);
+        }
 
-    //Exit:
-    //    if (NULL != pEngine)
-    //    {
-    //        delete pEngine;
-    //    }
-    //    return hr;
-    //}
+        IpSafeRelease(m_pDX11Device);
+        IpSafeRelease(m_pDXGIMan);
 
-    HRESULT Initialize(HWND hwndPreview, IUnknown* pUnk);
-
-    //void DestroyCaptureEngine()
-    //{
-    //    if (NULL != m_hEvent)
-    //    {
-    //        CloseHandle(m_hEvent);
-    //        m_hEvent = NULL;
-    //    }
-    //    SafeRelease(&m_pPreview);
-    //    SafeRelease(&m_pEngine);
-    //    SafeRelease(&m_pCallback);
-
-    //    if (g_pDXGIMan)
-    //    {
-    //        g_pDXGIMan->ResetDevice(g_pDX11Device, g_ResetToken);
-    //    }
-    //    SafeRelease(&g_pDX11Device);
-    //    SafeRelease(&g_pDXGIMan);
-
-    //    m_bPreviewing = false;
-    //    m_bRecording = false;
-    //    m_bPhotoPending = false;
-    //    m_errorID = 0;
-    //}
-
-
-
-    //bool    IsPreviewing() const { return m_bPreviewing; }
-    //bool    IsRecording() const { return m_bRecording; }
-    //bool    IsPhotoPending() const { return m_bPhotoPending; }
-    //UINT    ErrorID() const { return m_errorID; }
-
-    //HRESULT OnCaptureEvent(WPARAM wParam, LPARAM lParam);
-    //HRESULT SetVideoDevice(IUnknown *pUnk);
-    //HRESULT StartPreview();
-    //HRESULT StopPreview();
-    //HRESULT StartRecord(PCWSTR pszDestinationFile);
-    //void InitializeRecordLoop();
-    //void StopRecordLoop();
-    //HRESULT StartRecord();
-    //HRESULT StopRecord();
-    //HRESULT TakePhoto(PCWSTR pszFileName);
-
-    //void    SleepState(bool fSleeping)
-    //{
-    //    if (NULL != m_pCallback)
-    //    {
-    //        m_pCallback->m_fSleeping = fSleeping;
-    //    }
-    //}
-
-    //HRESULT UpdateVideo()
-    //{
-    //    if (m_pPreview)
-    //    {
-    //        return m_pPreview->UpdateVideo(NULL, NULL, NULL);
-    //    }
-    //    else
-    //    {
-    //        return S_OK;
-    //    }
-    //}
-
-	Capture()
-	{
-		Debug::Print(L"Capture::Capture");
-        //videoDevices = gcnew List<VideoDevice^>();
+        m_bPreviewing = false;
+        m_bRecording = false;
     }
-
-    //int CaptureDevices();
-
-    List<VideoDevice^>^ GetDevices();
 
 private:
 
-    //List<VideoDevice^> ^videoDevices;
+    // Capture Engine Event Handlers
+    void OnInitialized(HRESULT& hrStatus);
+
+    void WaitForResult()
+    {
+        WaitForSingleObject(m_hEvent, INFINITE);
+    }
+
+public:
+
+    ~Capture()
+    {
+        DestroyCaptureEngine();
+    }
 };
 
 }

@@ -2,8 +2,10 @@
 #include "FileManager.h"
 
 using namespace System::Collections;
+using namespace System::Diagnostics;
 using namespace System::IO;
 using namespace System::Text;
+using namespace System::Threading;
 
 ref class FileInfoComparer : IComparer
 {
@@ -63,6 +65,9 @@ String^ FileManager::GetNextFile()
 
 void FileManager::PruneFileList()
 {
+    auto sw = gcnew Stopwatch();
+    sw->Start();
+ 
     String^ path;
     StringBuilder^ searchPattern = gcnew StringBuilder();
 
@@ -78,13 +83,19 @@ void FileManager::PruneFileList()
 
     if (files->Length > maxFileQuota)
     {
+        Debug::Print("PruneFileList:: Number of files = {0}", files->Length);
+
         array<FileInfo^>::Sort(files, gcnew FileInfoComparer());
 
-        for (int i = 0; i <= files->Length - maxFileQuota; i++)
+        for (int i = 0; i <= files->Length - maxFileQuota - 1; i++)
         {
+            Debug::Print("PruneFileList:: Deleting {0}", files[i]->Name);
+
             files[i]->Delete();
         }
     }
+
+    Debug::Print("PruneFileList: Thread {0} Time {1}", Thread::CurrentThread->ManagedThreadId, sw->ElapsedTicks);
 }
 
 FileManager::~FileManager()

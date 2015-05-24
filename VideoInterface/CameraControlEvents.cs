@@ -18,7 +18,6 @@ namespace CameraRecorder
         public void OnPreviewStarted(int hResult)
         {
             Debug.Print("OnPreviewStarted");
-
             mainWindow.Dispatcher.Invoke(new Action<int>(mainWindow.OnPreviewStarted), hResult);
         }
 
@@ -32,14 +31,12 @@ namespace CameraRecorder
         public void OnRecordStarted(int hResult)
         {
             Debug.Print("OnRecordStarted");
-
             mainWindow.Dispatcher.Invoke(new Action<int>(mainWindow.OnRecordStarted), hResult);
         }
 
         public void OnRecordStopped(int hResult)
         {
             Debug.Print("OnRecordStopped");
-
             mainWindow.Dispatcher.Invoke(new Action<int>(mainWindow.OnRecordStopped), hResult);
         }
 

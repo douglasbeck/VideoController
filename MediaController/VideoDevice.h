@@ -13,6 +13,12 @@ namespace MediaController
 
         VideoDevice(IMFActivate* pDevice);
         String^ GetName() { return friendlyName; }
+        IMFActivate* GetVideoDevice() { return pVideoDevice; }
+
+        virtual String^ ToString() override
+        {
+            return friendlyName;
+        }
 
     private:
 
