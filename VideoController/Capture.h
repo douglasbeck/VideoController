@@ -66,23 +66,6 @@ public ref class Capture
     
 public:
 
-    Capture(ICaptureEventSink^ captureEventSink):
-        m_bInitialized(false),
-        m_bContinouslyRecording(false)
-        {
-
-        Debug::Print(L"Capture::Capture");
-
-        m_FileManager           = gcnew FileManager(const_cast<String^>(m_baseFileName), 4);
-        m_videoDevices          = gcnew List<VideoDevice^>();
-        m_captureEventSink      = captureEventSink;
-        m_pOnEventCallback      = new (std::nothrow) CaptureEngineOnEventCallback(this);
-        m_ContinuousRecordTimer = gcnew Timer(RecordLoopPeriod);
-
-        m_ContinuousRecordTimer->AutoReset = true;
-        m_ContinuousRecordTimer->Elapsed += gcnew ElapsedEventHandler(this, &Capture::OnTimedEvent);
-    }
-
     void            CaptureDevices();
     static HRESULT  CreateDX11Device(_Out_ ID3D11Device** ppDevice, _Out_ ID3D11DeviceContext** ppDeviceContext, _Out_ D3D_FEATURE_LEVEL* pFeatureLevel);
     HRESULT         CreateD3DManager();
@@ -98,6 +81,27 @@ public:
     HRESULT         StartRecord();
     HRESULT         StopRecord();
     void            UnInitialize();
+
+    static HRESULT Create(ICaptureEventSink^ captureEventSink, Capture^% capture)
+    {
+        HRESULT hResult = S_OK;
+
+        if (capture != nullptr)
+        {
+            return E_INVALIDARG;
+        }
+
+        hResult = MFStartup(MF_VERSION);
+
+        if (FAILED(hResult))
+        {
+            return hResult;
+        }
+
+        capture = gcnew Capture(captureEventSink);
+
+        return hResult;
+    }
 
     void OnTimedEvent(Object^ source, ElapsedEventArgs^ e)
     {
@@ -136,6 +140,22 @@ public:
 
 private:
 
+    Capture(ICaptureEventSink^ captureEventSink) :
+        m_bInitialized(false),
+        m_bContinouslyRecording(false)
+    {
+        Debug::Print(L"Capture::Capture");
+
+        m_FileManager = gcnew FileManager(const_cast<String^>(m_baseFileName), 4);
+        m_videoDevices = gcnew List<VideoDevice^>();
+        m_captureEventSink = captureEventSink;
+        m_pOnEventCallback = new (std::nothrow) CaptureEngineOnEventCallback(this);
+        m_ContinuousRecordTimer = gcnew Timer(RecordLoopPeriod);
+
+        m_ContinuousRecordTimer->AutoReset = true;
+        m_ContinuousRecordTimer->Elapsed += gcnew ElapsedEventHandler(this, &Capture::OnTimedEvent);
+    }
+
     // Capture Engine Event Handlers
     void OnInitialized(HRESULT& hrStatus);
 
@@ -149,6 +169,8 @@ public:
     ~Capture()
     {
         DestroyCaptureEngine();
+
+        MFShutdown();
     }
 };
 

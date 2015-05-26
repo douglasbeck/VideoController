@@ -24,13 +24,13 @@ namespace CameraRecorder
     /// </summary>
     public partial class MainWindow : Window
     {
-        const int MF_VERSION = 0x0002 << 16 | 0x0070;
-
         public MainWindow()
         {
             InitializeComponent();
 
-            int hResult = MediaFoundation.MFStartup(MF_VERSION);
+            cameraControlEvents = new CameraControlEvents(this);
+
+            int hResult = Capture.Create(cameraControlEvents, ref captureEngine);
 
             if (hResult < 0)
             {
@@ -38,8 +38,6 @@ namespace CameraRecorder
                 Application.Current.Shutdown();
             }
 
-            cameraControlEvents = new CameraControlEvents(this);
-            captureEngine = new Capture(cameraControlEvents);
             captureEngine.CaptureDevices();
             devices.SubmenuOpened += devices_SubmenuOpened;
             this.Closing += OnClosing;

@@ -43,6 +43,8 @@ namespace VideoController
 
     done:
 
+        SafeRelease(&pAttributes);
+
         return;
     }
 
